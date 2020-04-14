@@ -33,7 +33,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const pr = octokit.pulls.get({
+          const pr = github.pulls.get({
             context.repo.owner,
             context.repo.repo,
             context.issue.number
