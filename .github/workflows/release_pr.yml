@@ -35,6 +35,10 @@ jobs:
           
           const { exec } = require("child_process");
 
+           exec('ls -al docs/modules/ROOT/pages', (error, stdout, stderr) => {
+              console.log(stdout); // TMP
+          });
+
           exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
               if (error) {
                   github.issues.createComment({
