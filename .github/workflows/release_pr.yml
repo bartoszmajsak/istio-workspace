@@ -33,7 +33,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const { exec } = require("child_process").spawnSync;
+          const exec = require('@actions/exec');
           
           const pr = await github.pulls.get({
             owner: context.repo.owner,
@@ -41,29 +41,26 @@ jobs:
             pull_number: context.issue.number
           });
                   
-          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
-              if (error) {                 
-                  core.setFailed(`Failed with: ${error}`);
-              }
-          });
+          await exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`);
 
           const version = context.payload.comment.body.split(' ')[1]
-          
-          exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
-              console.log(stdout); // TMP
-          });
 
-          exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
-              if (error) {
-                  github.issues.createComment({
+          const options = {};
+          options.listeners = {
+            stderr: (data: Buffer) => {
+              const error = data.toString();
+              github.issues.createComment({
                     issue_number: context.issue.number,
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    body: `🛑😭 ${stderr}`
-                  });
-                  core.setFailed(`Failed with: ${error}`);
-              }
-          });
+                    body: `🛑😭 ${error}`
+              });
+              core.setFailed(`Failed with: ${error}`);
+            }
+          };
+
+          await exec(`./scripts/validate.sh ${version}`, options: options);
+          
     - name: Generate changelog
       if: success()
       uses: actions/github-script@0.9.0
