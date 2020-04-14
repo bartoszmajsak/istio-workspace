@@ -31,6 +31,7 @@ jobs:
           exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
               if (error) {
                   console.log(`🛑😭 error: ${error.message}`);
+                  console.log(`🛑😭 stderr: ${stderr}`);
                   return;
               }
               if (stderr) {
@@ -40,5 +41,6 @@ jobs:
               console.log(`🛑😭 stdout: ${stdout}`);
           });
     - name: Generate changelog
+      if: success()
       run: |
         echo "thanks"
