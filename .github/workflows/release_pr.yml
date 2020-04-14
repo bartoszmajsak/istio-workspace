@@ -34,15 +34,14 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN}}
         debug: true
         script: |
-          console.log('test');
+          const { exec } = require("child_process");
+          
           const pr = await github.pulls.get({
             owner: context.repo.owner,
             repo: context.repo.repo,
             pull_number: context.issue.number
           });
-          
-          console.log(pr.data.head.sha);
-          
+                  
           exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
               if (error) {                 
                   core.setFailed(`Failed with: ${error}`);
@@ -51,8 +50,6 @@ jobs:
 
           const version = context.payload.comment.body.split(' ')[1]
           
-          const { exec } = require("child_process");
-
           exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
               console.log(stdout); // TMP
           });
