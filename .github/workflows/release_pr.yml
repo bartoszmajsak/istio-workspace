@@ -39,11 +39,11 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             pull_number: context.issue.number
-          }).data;
+          });
           
           console.log(pr.data.head.sha);
           
-          exec(`git fetch origin pull/${pr.number}/head:${pr.head.ref} && git checkout ${pr.head.ref}`, (error, stdout, stderr) => {
+          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
               if (error) {                 
                   core.setFailed(`Failed with: ${error}`);
               }
