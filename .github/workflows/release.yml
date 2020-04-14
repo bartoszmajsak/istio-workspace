@@ -8,7 +8,9 @@ jobs:
   append_changelog:
     if: | 
       startsWith(github.event.comment.body, '/changelog') 
-      && (contains(github.event.comment.author_association, 'MEMBER') || contains(github.event.comment.author_association, 'OWNER'))
+      && (contains(github.event.comment.author_association, 'MEMBER') 
+          || contains(github.event.comment.author_association, 'OWNER')
+          || contains(github.event.comment.author_association, 'COLLABORATOR'))
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
