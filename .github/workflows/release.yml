@@ -15,6 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/github-script@0.9.0
+      name: "Validate PR"
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
@@ -27,16 +28,16 @@ jobs:
           });
           const { exec } = require("child_process");
 
-          exec("ls -la", (error, stdout, stderr) => {
+          exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
               if (error) {
-                  console.log(`error: ${error.message}`);
+                  console.log(`🛑😭 error: ${error.message}`);
                   return;
               }
               if (stderr) {
-                  console.log(`stderr: ${stderr}`);
+                  console.log(`🛑😭 stderr: ${stderr}`);
                   return;
               }
-              console.log(`stdout: ${stdout}`);
+              console.log(`🛑😭 stdout: ${stdout}`);
           });
     - name: Generate changelog
       run: |
