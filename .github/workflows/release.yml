@@ -18,7 +18,9 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          version = context.payload.comment.body.split()[1]
+          version = context.payload.comment.body
+          console.log(context.payload)
+          console.log(version)
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
