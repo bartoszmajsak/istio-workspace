@@ -18,13 +18,25 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          // TODO check if contributor
           version = context.payload.comment.body.split(' ')[1]
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: '⚙️ Generating changelog for `' + version + '`. It will be added to this PR.'
+          });
+          const { exec } = require("child_process");
+
+          exec("ls -la", (error, stdout, stderr) => {
+              if (error) {
+                  console.log(`error: ${error.message}`);
+                  return;
+              }
+              if (stderr) {
+                  console.log(`stderr: ${stderr}`);
+                  return;
+              }
+              console.log(`stdout: ${stdout}`);
           });
     - name: Generate changelog
       run: |
