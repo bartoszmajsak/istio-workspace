@@ -35,7 +35,7 @@ jobs:
         debug: true
         script: |
           console.log('test');
-          const pr = github.pulls.get({
+          const pr = await github.pulls.get({
             owner: context.repo.owner,
             repo: context.repo.repo,
             pull_number: context.issue.number
@@ -47,13 +47,13 @@ jobs:
           
           const { exec } = require("child_process");
 
-           exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
+          exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
               console.log(stdout); // TMP
           });
 
           exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
               if (error) {
-                  github.issues.createComment({
+                  await github.issues.createComment({
                     issue_number: context.issue.number,
                     owner: context.repo.owner,
                     repo: context.repo.repo,
