@@ -33,6 +33,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
+          console.log(context);
           version = context.payload.comment.body.split(' ')[1]
           
           const { exec } = require("child_process");
