@@ -11,12 +11,12 @@ validate_version() {
   version=$1
 
   if [[ ${version} == "" ]]; then
-    die "Undefined version (pass using -v|--version). Please use semantic version. Read more about it here: https://semver.org/"
+    die "Undefined version (pass using -v|--version). Please use semantic versioning. Read more about it here: https://semver.org/"
   fi
 
   # ensure defined version matches semver rules
   if [[ ! "${version}" =~ $sem_ver_pattern ]]; then
-    die "Version \`${version}\` you defined does not match semantic version. Read more about it here: https://semver.org/"
+    die "Version \`${version}\` you defined does not match semantic versioning. Read more about it here: https://semver.org/"
   fi
 
   # ensure release notes exist
