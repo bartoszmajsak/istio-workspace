@@ -14,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
     - uses: actions/github-script@0.9.0
       name: Notify
       with:
@@ -59,7 +57,7 @@ jobs:
             }
           };
 
-          await exec(`./scripts/validate.sh ${version}`, options: options);
+          await exec(commandLine:`./scripts/validate.sh ${version}`, options: options);
           
     - name: Generate changelog
       if: success()
