@@ -48,5 +48,25 @@ jobs:
           });
     - name: Generate changelog
       if: success()
-      run: |
-        echo "thanks"
+      uses: actions/github-script@0.9.0
+      env:
+        GHC_GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        debug: true
+        script: |
+          version = context.payload.comment.body.split(' ')[1]
+                  
+          const { exec } = require("child_process");
+  
+          exec(`$(curl -sL http://git.io/install-ghc | bash -s -- --path-only)/ghc generate -r maistra/istio-workspace --format adoc >> docs/modules/ROOT/pages/release_notes/${version}.adoc`, (error, stdout, stderr) => {
+              if (error || stderr) {
+                  github.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: `🛑😭 ${stderr}`
+                  });
+                  core.setFailed(`Failed with: ${error}`);
+              }
+          });
