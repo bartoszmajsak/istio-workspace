@@ -45,7 +45,7 @@ jobs:
 
           const options = {};
           options.listeners = {
-            stderr: (data: Buffer) => {
+            stderr: (data) => {
               const error = data.toString();
               github.issues.createComment({
                     issue_number: context.issue.number,
