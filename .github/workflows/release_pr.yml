@@ -34,10 +34,11 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN}}
         debug: true
         script: |
+          console.log('test');
           const pr = github.pulls.get({
-            context.repo.owner,
-            context.repo.repo,
-            context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
           });
           
           console.log(pr);
