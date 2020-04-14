@@ -1,4 +1,4 @@
-name: release
+name: Release Pull Request
 
 on:
   issue_comment:
@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/github-script@0.9.0
-      name: "Validate PR"
+      name: Validate
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
@@ -26,19 +26,19 @@ jobs:
             repo: context.repo.repo,
             body: '⚙️ Generating changelog for `' + version + '`. It will be added to this PR.'
           });
+          
           const { exec } = require("child_process");
 
           exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
               if (error) {
-                  console.log(`🛑😭 error: ${error.message}`);
-                  console.log(`🛑😭 stderr: ${stderr}`);
-                  return;
+                  github.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: `🛑😭 ${stderr}`
+                  });
+                  core.error(`Error ${error}, action may still succeed though`);
               }
-              if (stderr) {
-                  console.log(`🛑😭 stderr: ${stderr}`);
-                  return;
-              }
-              console.log(`🛑😭 stdout: ${stdout}`);
           });
     - name: Generate changelog
       if: success()
