@@ -41,7 +41,13 @@ jobs:
             pull_number: context.issue.number
           });
           
-          console.log(pr);
+          console.log(pr.data.head.sha);
+          
+          exec(`git fetch origin pull/${pr.number}/head:${pr.head.ref} && git checkout ${pr.head.ref}`, (error, stdout, stderr) => {
+              if (error) {                 
+                  core.setFailed(`Failed with: ${error}`);
+              }
+          });
 
           const version = context.payload.comment.body.split(' ')[1]
           
