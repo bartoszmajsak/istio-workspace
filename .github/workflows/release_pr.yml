@@ -32,11 +32,12 @@ jobs:
       name: Validate
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
+        debug: true
         script: |
           const pr = github.pulls.get({
             context.repo.owner,
             context.repo.repo,
-            context.issue.number
+            context.issue.number,
           });
           
           console.log(pr);
