@@ -22,7 +22,7 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: '⚙️ Generating changelog for `' + version + '`. It will be added to this PR.`
+            body: '⚙️ Generating changelog for `' + version + '`. It will be added to this PR.'
           });
     - name: Generate changelog
       run: |
