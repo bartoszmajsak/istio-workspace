@@ -33,8 +33,15 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          console.log(context.payload.issue.pull_request);
-          version = context.payload.comment.body.split(' ')[1]
+          const pr = octokit.pulls.get({
+            context.repo.owner,
+            context.repo.repo,
+            context.issue.number
+          });
+          
+          console.log(pr);
+
+          const version = context.payload.comment.body.split(' ')[1]
           
           const { exec } = require("child_process");
 
