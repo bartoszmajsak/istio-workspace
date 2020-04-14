@@ -9,6 +9,8 @@ on:
 jobs:
   append_changelog:
     if: startsWith(github.event.comment.body, '/version')
+    env:
+      comment: ${{ toJson(github.event.comment) }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -16,7 +18,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          version = github.event.comment.body.split()[1]
+          version = $comment.body.split()[1]
           github.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
