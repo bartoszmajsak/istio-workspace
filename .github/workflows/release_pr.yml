@@ -33,7 +33,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const { exec } = require("child_process");
+          const { exec } = require("child_process").spawnSync;
           
           const pr = await github.pulls.get({
             owner: context.repo.owner,
@@ -41,7 +41,7 @@ jobs:
             pull_number: context.issue.number
           });
                   
-          await exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
+          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
               if (error) {                 
                   core.setFailed(`Failed with: ${error}`);
               }
@@ -49,7 +49,7 @@ jobs:
 
           const version = context.payload.comment.body.split(' ')[1]
           
-          await exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
+          exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
               console.log(stdout); // TMP
           });
 
