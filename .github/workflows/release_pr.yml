@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/github-script@0.9.0
-      name: Validate
+      name: Notify
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
@@ -26,6 +26,12 @@ jobs:
             repo: context.repo.repo,
             body: '⚙️ Generating changelog for `' + version + '`. It will be added to this PR.'
           });
+    - uses: actions/github-script@0.9.0
+      name: Validate
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          version = context.payload.comment.body.split(' ')[1]
           
           const { exec } = require("child_process");
 
@@ -37,7 +43,7 @@ jobs:
                     repo: context.repo.repo,
                     body: `🛑😭 ${stderr}`
                   });
-                  core.error(`Error ${error}, action may still succeed though`);
+                  core.setFailed(`Failed with: ${error}`);
               }
           });
     - name: Generate changelog
