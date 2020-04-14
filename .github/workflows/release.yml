@@ -6,7 +6,9 @@ on:
 
 jobs:
   append_changelog:
-    if: startsWith(github.event.comment.body, '/changelog')
+    if: | 
+      startsWith(github.event.comment.body, '/changelog') 
+      && (contains(github.event.comment.author_association, 'MEMBER') || contains(github.event.comment.author_association, 'OWNER'))
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,5 +22,8 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: '⚙️ Generating changelog for ' + version 
+            body: '⚙️ Generating changelog for `' + version + '`. It will be added to this PR.`
           });
+    - name: Generate changelog
+      run: |
+        echo "thanks"
