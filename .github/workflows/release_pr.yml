@@ -41,9 +41,7 @@ jobs:
             pull_number: context.issue.number
           });
                   
-          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
-              console.log(stdout); 
-              console.log(stderr);
+          await exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
               if (error) {                 
                   core.setFailed(`Failed with: ${error}`);
               }
@@ -51,7 +49,7 @@ jobs:
 
           const version = context.payload.comment.body.split(' ')[1]
           
-          exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
+          await exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
               console.log(stdout); // TMP
           });
 
