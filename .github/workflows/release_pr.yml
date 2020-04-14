@@ -57,7 +57,7 @@ jobs:
             }
           };
 
-          await exec(commandLine:`./scripts/validate.sh ${version}`, options: options);
+          await exec('./scripts/validate.sh', [ version ], options);
           
     - name: Generate changelog
       if: success()
