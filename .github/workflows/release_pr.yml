@@ -170,14 +170,14 @@ jobs:
           const { exec } = require("child_process");
           
           exec(`./scripts/release.sh -v ${version}`, (error, stdout, stderr) => {
-              if (error || stderr) {
+              if (error) {
                   github.issues.createComment({
                     issue_number: context.issue.number,
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     body: `🛑😭 ${stderr}`
                   });
-                  core.setFailed(`Validation failed!`);
+                  core.setFailed(`Release failed!`);
               } else {
                 github.issues.createComment({
                     issue_number: context.issue.number,
