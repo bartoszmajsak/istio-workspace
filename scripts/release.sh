@@ -55,13 +55,19 @@ if [[ ${tag_exists} -ne 0 ]]; then
   die "Tag ${version} already exists!"
 fi
 
+## Rebase the whole thing
+branch=$(git rev-parse --abbrev-ref HEAD)
+git reset $(git merge-base master $branch)   
+author=$(git show -s --format='%an <%ae>' $(git log master..$branch --oneline | tail -1 | cut -d' ' -f 1))
+
+
 ## Replace antora version for docs build
 sed -i "/version:/c\version: ${version}" docs/antora.yml
 sed -i "/^== Releases.*/a include::release_notes\/${version}.adoc[]\n" docs/modules/ROOT/pages/release_notes.adoc
 
 git add .
 
-git commit -F- <<EOF
+git commit --author=$author -F- <<EOF
 release: ${version}
 
 /tag ${version}
@@ -71,4 +77,4 @@ EOF
 sed -i "/version:/c\version: latest" docs/antora.yml
 git commit -am"release: next iteration"
 
-git push
+git push -f
