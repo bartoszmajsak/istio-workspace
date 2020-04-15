@@ -17,7 +17,7 @@ jobs:
     - name: Set GitHub user
       run: |
         git config --local user.name "Alien Ike"
-        git config --local user.email "arquillian-team@lists.jboss.org"
+        git config --local user.email "arquillian-team@lists.jboss.org"        
     - uses: actions/github-script@0.9.0
       name: Checkout PR branch
       with:
@@ -31,7 +31,7 @@ jobs:
             pull_number: context.issue.number
           });
 
-          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
+          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, (error, stdout, stderr) => {
               if (error) {                 
                   core.setFailed(`Failed checking out PR branch. ${error}`);
                   console.log(stderr);
