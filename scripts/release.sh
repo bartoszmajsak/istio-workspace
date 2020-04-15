@@ -64,7 +64,7 @@ git add .
 git commit -F- <<EOF
 release: ${version}
 
-/release
+/tag ${version}
 EOF
 
 ## Prepare next release iteration
