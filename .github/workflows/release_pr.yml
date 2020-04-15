@@ -183,11 +183,8 @@ jobs:
                     issue_number: context.issue.number,
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    body: `🚀🚀🚀 We are ready to ship new version! Rebase that PR on top of master and let the magic happen!`
+                    body: `🎇 🎉 🎆 ${version} has been shipped! 🚀🚀🚀`
                   });
               }
-          });
-
+          }); 
     
-    
-
