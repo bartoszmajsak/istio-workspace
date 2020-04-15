@@ -15,6 +15,26 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/github-script@0.9.0
+      name: Checkout PR branch
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const { exec } = require("child_process")
+
+          const pr = await github.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          });
+
+          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`, (error, stdout, stderr) => {
+              if (error) {                 
+                  core.setFailed(`Failed checking out PR branch. ${error}`);
+                  console.log(stderr);
+              }
+          });
+
+    - uses: actions/github-script@0.9.0
       name: Notify
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
@@ -31,33 +51,21 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const exec = require('@actions/exec');
-          
-          const pr = await github.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          });
+          version = context.payload.comment.body.split(' ')[1]
                   
-          await exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref}`);
-
-          const version = context.payload.comment.body.split(' ')[1]
-
-          const options = {};
-          options.listeners = {
-            stderr: (data) => {
-              const error = data.toString();
-              github.issues.createComment({
+          const { exec } = require("child_process");
+          
+          exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
+              if (error || stderr) {
+                  github.issues.createComment({
                     issue_number: context.issue.number,
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    body: `🛑😭 ${error}`
-              });
-              core.setFailed(`Failed with: ${error}`);
-            }
-          };
-
-          await exec('./scripts/validate.sh', [ version ], options);
+                    body: `🛑😭 ${stderr}`
+                  });
+                  core.setFailed(`Failed with: ${error}`);
+              }
+          });
           
     - name: Generate changelog
       if: success()
@@ -66,7 +74,6 @@ jobs:
         GHC_GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
-        debug: true
         script: |
           version = context.payload.comment.body.split(' ')[1]
                   
@@ -78,8 +85,24 @@ jobs:
                     issue_number: context.issue.number,
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    body: `🛑😭 ${stderr}`
+                    body: `🤦😭 ${stderr}`
                   });
                   core.setFailed(`Failed with: ${error}`);
+              } else {
+                exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
+                  console.log(stdout); // TMP
+                });
               }
+          });
+    - name: Comment about action failure
+      if: failure()
+      uses: actions/github-script@0.9.0
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '🤷 🤦 Failed generating changelog. Please check details in the GitHub action.'
           });
