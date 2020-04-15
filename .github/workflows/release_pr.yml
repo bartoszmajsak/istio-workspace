@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set GitHub user
+      run: |
+        git config --local user.name "Alien Ike"
+        git config --local user.email "arquillian-team@lists.jboss.org"
     - uses: actions/github-script@0.9.0
       name: Checkout PR branch
       with:
@@ -89,7 +93,7 @@ jobs:
                   });
                   core.setFailed(`Failed with: ${error}`);
               } else {
-                exec(`git add . && git commit -m"release: adds changelog for ${version}"`, (error, stdout, stderr) => {
+                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push`, (error, stdout, stderr) => {
                       if (error || stderr) {
                       github.issues.createComment({
                         issue_number: context.issue.number,
