@@ -93,7 +93,7 @@ jobs:
                   });
                   core.setFailed(`Failed with: ${error}`);
               } else {
-                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push`, (error, stdout, stderr) => {
+                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, (error, stdout, stderr) => {
                     if (error) {
                       github.issues.createComment({
                         issue_number: context.issue.number,
@@ -102,6 +102,13 @@ jobs:
                         body: `🤦😭\n\n${error}\n\n${stderr}`
                       });
                       core.setFailed(`Failed with: ${error}`);
+                  } else {
+                     github.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: `✅ Changelog added in ${stdout} 🙌🙌🙌 `
+                      });
                   }
                 });
               }
