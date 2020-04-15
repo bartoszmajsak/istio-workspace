@@ -89,8 +89,16 @@ jobs:
                   });
                   core.setFailed(`Failed with: ${error}`);
               } else {
-                exec('ls -al docs/modules/ROOT/pages/release_notes/', (error, stdout, stderr) => {
-                  console.log(stdout); // TMP
+                exec(`git add . && git commit -m"release: adds changelog for ${version}"`, (error, stdout, stderr) => {
+                      if (error || stderr) {
+                      github.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: `🤦😭\n\n${stderr}`
+                      });
+                      core.setFailed(`Failed with: ${error}`);
+                  }
                 });
               }
           });
