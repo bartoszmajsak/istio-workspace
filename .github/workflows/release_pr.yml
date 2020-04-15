@@ -129,7 +129,6 @@ jobs:
           });
       
   prepare_release:
-    needs: [append_changelog]    
     if: | 
       startsWith(github.event.comment.body, '/release') 
       && (contains(github.event.comment.author_association, 'MEMBER') 
