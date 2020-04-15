@@ -93,7 +93,7 @@ jobs:
                   });
                   core.setFailed(`Failed with: ${error}`);
               } else {
-                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD | tail -1`, (error, stdout, stderr) => {
+                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, (error, stdout, stderr) => {
                     if (error) {
                       github.issues.createComment({
                         issue_number: context.issue.number,
@@ -103,11 +103,13 @@ jobs:
                       });
                       core.setFailed(`Failed with: ${error}`);
                   } else {
+                     var lines = stdout.match(/(.+)([^\s])/g);
+                     const commitHash = lines[lines.length -1];
                      github.issues.createComment({
                         issue_number: context.issue.number,
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        body: `✅ Changelog added in ${stdout} 🙌🙌🙌 `
+                        body: `✅ Changelog added in ${commitHash} 🙌🙌🙌 `
                       });
                   }
                 });
