@@ -93,7 +93,7 @@ jobs:
                   });
                   core.setFailed(`Failed with: ${error}`);
               } else {
-                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, (error, stdout, stderr) => {
+                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD | tail -1`, (error, stdout, stderr) => {
                     if (error) {
                       github.issues.createComment({
                         issue_number: context.issue.number,
