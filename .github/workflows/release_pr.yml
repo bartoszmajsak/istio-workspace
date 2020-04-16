@@ -31,10 +31,10 @@ jobs:
             pull_number: context.issue.number
           });
 
-          const { error, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
-          if (error) {                 
+          const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
+          if (status != 0) {                 
               core.setFailed(`Failed checking out PR branch. ${error}`);
-              console.log(stderr);
+              console.log(stderr.toString());
           }
     - uses: actions/github-script@0.9.0
       name: Notify
@@ -57,18 +57,16 @@ jobs:
                   
           const { spawnSync } = require("child_process");
           
-          const result = spawnSync(`./scripts/validate.sh ${version}`, {shell: true});        
-          
-          console.log(result);
-          
-          if (result.error || result.stderr) {
+          const { status, stderr } = spawnSync(`./scripts/validate.sh ${version}`, {shell: true});        
+                             
+          if (status != 0) {
               github.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `🛑😭 ${stderr}`
+                body: `🛑😭 ${stderr.toString()}`
               });
-              core.setFailed(`Validation failed! ${error}`);
+              core.setFailed(`Validation failed!`);
           }                
           
     - name: Generate changelog
@@ -83,27 +81,28 @@ jobs:
                   
           const { spawnSync } = require("child_process");
   
-          const { error, stderr } = spawnSync(`$(curl -sL http://git.io/install-ghc | bash -s -- --path-only)/ghc generate -r maistra/istio-workspace --format adoc >> docs/modules/ROOT/pages/release_notes/${version}.adoc`, {shell: true});
-          if (error || stderr) {
+          const { status, stderr } = spawnSync(`$(curl -sL http://git.io/install-ghc | bash -s -- --path-only)/ghc generate -r maistra/istio-workspace --format adoc >> docs/modules/ROOT/pages/release_notes/${version}.adoc`, {shell: true});
+          
+          if (status != 0) {
               github.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `🤦😭\n\n${stderr}`
+                body: `🤦😭\n\n${stderr.toString()}`
               });
-              core.setFailed(`Failed with: ${error}`);
+              core.setFailed(`Failed generating changelog`);
           } else {
-            const { error, stderr, stdout } = spawnSync(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, {shell: true});
-            if (error) {
+            const { status, stderr, stdout } = spawnSync(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, {shell: true});
+            if (status != 0) {
                 github.issues.createComment({
                   issue_number: context.issue.number,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: `🤦😭\n\n${error}\n\n${stderr}`
+                  body: `🤦😭\n\n${error}\n\n${stderr.toString()}`
                 });
-                core.setFailed(`Failed with: ${error}`);
+                core.setFailed(`Failed commiting changelog`);
             } else {
-               var lines = stdout.match(/(.+)([^\s])/g);
+               var lines = stdout.toString().match(/(.+)([^\s])/g);
                const commitHash = lines[lines.length -1];
                github.issues.createComment({
                   issue_number: context.issue.number,
@@ -146,7 +145,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const { execSync } = require("child_process")
+          const { spawnSync } = require("child_process")
 
           const pr = await github.pulls.get({
             owner: context.repo.owner,
@@ -154,12 +153,11 @@ jobs:
             pull_number: context.issue.number
           });
 
-          execSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, (error, stdout, stderr) => {
-              if (error) {                 
-                  core.setFailed(`Failed checking out PR branch. ${error}`);
-                  console.log(stderr);
-              }
-          });
+          const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
+          if (status != 0) {                 
+              core.setFailed(`Failed checking out PR branch. ${error}`);
+              console.log(stderr.toString());
+          }
     - uses: actions/github-script@0.9.0
       name: Release commits
       with:
@@ -167,39 +165,38 @@ jobs:
         script: |
           version = context.payload.comment.body.split(' ')[1]
                   
-          const { execSync } = require("child_process");
+          const { spawnSync } = require("child_process");
           
-          execSync(`./scripts/release.sh -v ${version}`, (error, stdout, stderr) => {
-              if (error) {
+          const {status, stderr} = spawnSync(`./scripts/release.sh -v ${version}`, {shell: true});
+          if (status != 0) {
+              github.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `🛑😭 ${stderr.toString()}`
+              });
+              core.setFailed(`Release failed!`);
+          } else {
+              github.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  merge_method: 'rebase'
+              }).then(() => {
                   github.issues.createComment({
                       issue_number: context.issue.number,
                       owner: context.repo.owner,
                       repo: context.repo.repo,
-                      body: `🛑😭 ${stderr}`
+                      body: `🎇 🎉 🎆 ${version} has been shipped! 🚀🚀🚀`
                   });
-                  core.setFailed(`Release failed!`);
-              } else {
-                  github.pulls.merge({
+              }).catch((data) => {
+                  github.issues.createComment({
+                      issue_number: context.issue.number,
                       owner: context.repo.owner,
                       repo: context.repo.repo,
-                      pull_number: context.issue.number,
-                      merge_method: 'rebase'
-                  }).then(() => {
-                      github.issues.createComment({
-                          issue_number: context.issue.number,
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          body: `🎇 🎉 🎆 ${version} has been shipped! 🚀🚀🚀`
-                      });
-                  }).catch((data) => {
-                      github.issues.createComment({
-                          issue_number: context.issue.number,
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          body: `🛑😭 ${data.message}`
-                      });
-                      core.setFailed(`Merge failed!`);
+                      body: `🛑😭 ${data.message}`
                   });
-              }
-          });
+                  core.setFailed(`Merge failed!`);
+              });
+          }
     
