@@ -137,7 +137,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        depth: 0
+        fetch-depth: 0
     - name: Set GitHub user
       run: |
         git config --local user.name "Alien Ike"
