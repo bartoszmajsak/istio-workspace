@@ -113,12 +113,7 @@ jobs:
               });
               core.setFailed(`Release failed!`);
           } else {
-              github.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: `🎇 🎉 🎆 ${version} has been shipped! 🚀🚀🚀`
-              });
+              // TODO status
           }
     ### Temporary
     - name: Comment about action failure
@@ -132,6 +127,43 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             body: '🤷 🤦 Failed generating changelog. Please check details in the GitHub action.'
+          });
+          
+  shipit:
+    if: | 
+      startsWith(github.event.comment.body, '/shipit') 
+      && (contains(github.event.comment.author_association, 'MEMBER') 
+          || contains(github.event.comment.author_association, 'OWNER')
+          || contains(github.event.comment.author_association, 'COLLABORATOR'))
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2    
+    - name: Rebase on master
+      uses: actions/github-script@0.9.0      
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          // TODO check if mergeable
+          github.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  merge_method: 'rebase'
+          }).then(() => {
+              github.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `🎇 🎉 🎆 ${version} has been shipped! 🚀🚀🚀`
+              });
+          }).catch((data) => {
+              github.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `🛑😭 ${data.message}`
+              });
+              core.setFailed(`Merge failed!`);
           });
       
 
