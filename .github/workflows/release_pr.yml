@@ -23,7 +23,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const { exec } = require("child_process")
+          const { execSync } = require("child_process")
 
           const pr = await github.pulls.get({
             owner: context.repo.owner,
@@ -31,7 +31,7 @@ jobs:
             pull_number: context.issue.number
           });
 
-          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, (error, stdout, stderr) => {
+          execSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, (error, stdout, stderr) => {
               if (error) {                 
                   core.setFailed(`Failed checking out PR branch. ${error}`);
                   console.log(stderr);
@@ -57,9 +57,9 @@ jobs:
         script: |
           version = context.payload.comment.body.split(' ')[1]
                   
-          const { exec } = require("child_process");
+          const { execSync } = require("child_process");
           
-          exec(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
+          execSync(`./scripts/validate.sh ${version}`, (error, stdout, stderr) => {
               if (error || stderr) {
                   github.issues.createComment({
                     issue_number: context.issue.number,
@@ -81,9 +81,9 @@ jobs:
         script: |
           version = context.payload.comment.body.split(' ')[1]
                   
-          const { exec } = require("child_process");
+          const { execSync } = require("child_process");
   
-          exec(`$(curl -sL http://git.io/install-ghc | bash -s -- --path-only)/ghc generate -r maistra/istio-workspace --format adoc >> docs/modules/ROOT/pages/release_notes/${version}.adoc`, (error, stdout, stderr) => {
+          execSync(`$(curl -sL http://git.io/install-ghc | bash -s -- --path-only)/ghc generate -r maistra/istio-workspace --format adoc >> docs/modules/ROOT/pages/release_notes/${version}.adoc`, (error, stdout, stderr) => {
               if (error || stderr) {
                   github.issues.createComment({
                     issue_number: context.issue.number,
@@ -93,7 +93,7 @@ jobs:
                   });
                   core.setFailed(`Failed with: ${error}`);
               } else {
-                exec(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, (error, stdout, stderr) => {
+                execSync(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, (error, stdout, stderr) => {
                     if (error) {
                       github.issues.createComment({
                         issue_number: context.issue.number,
@@ -146,7 +146,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const { exec } = require("child_process")
+          const { execSync } = require("child_process")
 
           const pr = await github.pulls.get({
             owner: context.repo.owner,
@@ -154,7 +154,7 @@ jobs:
             pull_number: context.issue.number
           });
 
-          exec(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, (error, stdout, stderr) => {
+          execSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, (error, stdout, stderr) => {
               if (error) {                 
                   core.setFailed(`Failed checking out PR branch. ${error}`);
                   console.log(stderr);
@@ -167,9 +167,9 @@ jobs:
         script: |
           version = context.payload.comment.body.split(' ')[1]
                   
-          const { exec } = require("child_process");
+          const { execSync } = require("child_process");
           
-          exec(`./scripts/release.sh -v ${version}`, (error, stdout, stderr) => {
+          execSync(`./scripts/release.sh -v ${version}`, (error, stdout, stderr) => {
               if (error) {
                   github.issues.createComment({
                       issue_number: context.issue.number,
