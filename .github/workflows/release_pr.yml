@@ -33,8 +33,8 @@ jobs:
 
           const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
           if (status != 0) {                 
-              core.setFailed(`Failed checking out PR branch. ${error}`);
               console.log(stderr.toString());
+              core.setFailed(`Failed checking out PR branch. ${stderr.toString()}`);              
           }
     - uses: actions/github-script@0.9.0
       name: Notify
@@ -136,6 +136,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        depth: 0
     - name: Set GitHub user
       run: |
         git config --local user.name "Alien Ike"
@@ -155,8 +157,8 @@ jobs:
 
           const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
           if (status != 0) {                 
-              core.setFailed(`Failed checking out PR branch. ${error}`);
               console.log(stderr.toString());
+              core.setFailed(`Failed checking out PR branch. ${stderr.toString()}`);
           }
     - uses: actions/github-script@0.9.0
       name: Release commits
