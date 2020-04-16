@@ -1,4 +1,5 @@
 = Releases
+
 include::release_notes/v0.0.3.adoc[]
 
 include::release_notes/v0.0.2.adoc[]
