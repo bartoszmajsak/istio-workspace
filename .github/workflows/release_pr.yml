@@ -65,7 +65,7 @@ jobs:
                 repo: context.repo.repo,
                 body: `🛑😭 ${stderr}`
               });
-              core.setFailed(`Validation failed!`);
+              core.setFailed(`Validation failed! ${error}`);
           }
           
     - name: Generate changelog
