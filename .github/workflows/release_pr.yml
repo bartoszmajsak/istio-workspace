@@ -23,7 +23,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
-          const { execSync } = require("child_process")
+          const { spawnSync } = require("child_process")
 
           const pr = await github.pulls.get({
             owner: context.repo.owner,
@@ -31,7 +31,7 @@ jobs:
             pull_number: context.issue.number
           });
 
-          const { error } = execSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`);
+          const { error } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`);
           if (error) {                 
               core.setFailed(`Failed checking out PR branch. ${error}`);
               console.log(stderr);
@@ -55,9 +55,9 @@ jobs:
         script: |
           version = context.payload.comment.body.split(' ')[1]
                   
-          const { execSync } = require("child_process");
+          const { spawnSync } = require("child_process");
           
-          const { error, stderr } = execSync(`./scripts/validate.sh ${version}`);        
+          const { error, stderr } = spawnSync(`./scripts/validate.sh ${version}`);        
           if (error || stderr) {
               github.issues.createComment({
                 issue_number: context.issue.number,
