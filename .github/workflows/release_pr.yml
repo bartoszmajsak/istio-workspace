@@ -54,7 +54,7 @@ jobs:
                 repo: context.repo.repo,
                 body: `🛑😭 ${stderr.toString()}`
               });
-              core.setFailed(`Validation failed!`);
+              core.setFailed('Validation failed!');
           }                
           
     - name: Generate changelog
@@ -78,7 +78,7 @@ jobs:
                 repo: context.repo.repo,
                 body: `🤦😭\n\n${stderr.toString()}`
               });
-              core.setFailed(`Failed generating changelog`);
+              core.setFailed('Failed generating changelog');
           } else {
             const { status, stderr, stdout } = spawnSync(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, {shell: true});
             if (status != 0) {
@@ -88,7 +88,7 @@ jobs:
                   repo: context.repo.repo,
                   body: `🤦😭\n\n${error}\n\n${stderr.toString()}`
                 });
-                core.setFailed(`Failed committing changelog`);
+                core.setFailed('Failed committing changelog');
             } 
           }
     
@@ -111,7 +111,7 @@ jobs:
                   repo: context.repo.repo,
                   body: `🛑😭 ${stderr.toString()}`
               });
-              core.setFailed(`Release failed!`);
+              core.setFailed('Release failed!');
           } else {
               // TODO status
           }
@@ -142,8 +142,7 @@ jobs:
       uses: actions/github-script@0.9.0      
       with:
         github-token: ${{secrets.GH_RELEASE_TOKEN}}
-        script: |
-          // TODO check if mergeable
+        script: |        
           github.pulls.merge({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -154,7 +153,7 @@ jobs:
                   issue_number: context.issue.number,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: `🎇 🎉 🎆 ${version} has been shipped! 🚀🚀🚀`
+                  body: `🎇 🎉 🎆 New version has been shipped! 🚀🚀🚀`
               });
           }).catch((data) => {
               github.issues.createComment({
@@ -163,7 +162,7 @@ jobs:
                   repo: context.repo.repo,
                   body: `🛑😭 ${data.message}`
               });
-              core.setFailed(`Merge failed!`);
+              core.setFailed('Merge failed!');
           });
       
 
