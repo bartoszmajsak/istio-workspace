@@ -26,20 +26,22 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            github.checks.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: 'release / changelog',
-                status: 'in_progress',
-                head_sha: context.sha,
-            })
-
             const { spawnSync } = require("child_process")
 
             const pr = await github.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number
+            });
+
+            core.exportVariable("PR_HEAD_REF", pr.data.head.sha);
+
+            const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          sha: pr.data.head.sha,
+                          context: 'release / changelog',
+                          state: 'pending',
             });
 
             const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
@@ -58,6 +60,7 @@ jobs:
                 })
                 core.setFailed(`Failed checking out PR branch. ${stderr.toString()}`);
             }
+
       - name: Validate
         uses: actions/github-script@0.9.0
         with:
@@ -70,6 +73,7 @@ jobs:
             const { status, stderr } = spawnSync(`./.github/actions/validate.sh ${version}`, {shell: true});
 
             if (status != 0) {
+                const { data }
                 github.checks.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
