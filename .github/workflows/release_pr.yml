@@ -22,65 +22,61 @@ jobs:
           git config --local user.name "${GIT_USER}"
           git config --local user.email "${GIT_EMAIL}"
       - name: Checkout PR branch
+        id: checkout
         uses: actions/github-script@0.9.0
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            github.checks.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: 'release / changelog',
-                status: 'in_progress',
-                head_sha: context.sha,
-            })
-
-            const { spawnSync } = require("child_process")
-
             const pr = await github.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
 
+            const prHead = pr.data.head.sha;
+            core.setOutput("pr_head", prHead);
+
+            const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: prHead,
+              context: 'release / changelog',
+              state: 'pending',
+            });
+
+            const { spawnSync } = require("child_process")
             const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
 
             if (status != 0) {
-                github.checks.create({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: 'release / changelog',
-                    status: 'completed',
-                    conclusion: 'failure',
-                    head_sha: context.sha,
-                    output: {
-                      title: `🛑😭 Failed checking out PR branch. ${stderr.toString()}`
-                    },
-                })
-                core.setFailed(`Failed checking out PR branch. ${stderr.toString()}`);
+              core.exportVariable("STATUS", JSON.stringify({ sha: prHead,
+                context: 'release / changelog',
+                state: 'error',
+                description: 'Failed checking out PR branch. See see action log for details',
+              }));
+              core.setFailed('Failed checking out PR branch.');
             }
+
       - name: Validate
+        id: validation
         uses: actions/github-script@0.9.0
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            version = context.payload.comment.body.split(' ')[1]
+            const version = context.payload.comment.body.split(' ')[1]
+            core.setOutput("version", version);
 
             const { spawnSync } = require("child_process");
 
             const { status, stderr } = spawnSync(`./.github/actions/validate.sh ${version}`, {shell: true});
 
             if (status != 0) {
-                github.checks.create({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: 'release / changelog',
-                    status: 'completed',
-                    conclusion: 'failure',
-                    head_sha: context.sha,
-                    output: {
-                      title: `🛑😭 ${stderr.toString()}`
-                    },
-                })
+                const prHead = "${{ steps.checkout.outputs.pr_head }}";
+                core.exportVariable("STATUS", JSON.stringify({ sha: prHead,
+                  context: 'release / changelog',
+                  state: 'failure',
+                  description: 'Failed validating PR content.',
+                  details: stderr.toString(),
+                }));
                 core.setFailed('Validation failed!');
             }
 
@@ -92,30 +88,30 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            version = context.payload.comment.body.split(' ')[1]
+            const version = "${{ steps.validation.outputs.version }}";
+            const prHead = "${{ steps.checkout.outputs.pr_head }}";
 
             const { spawnSync } = require("child_process");
 
             const { status, stderr } = spawnSync(`$(curl -sL http://git.io/install-ghc | bash -s -- --path-only)/ghc generate -r maistra/istio-workspace --format adoc >> docs/modules/ROOT/pages/release_notes/${version}.adoc`, {shell: true});
 
             if (status != 0) {
-                github.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: `🤦😭\n\n${stderr.toString()}`
-                });
+                core.exportVariable("status", JSON.stringify({ sha: prHead,
+                  context: 'release / changelog',
+                  state: 'failure',
+                  description: 'Failed validating PR content.',
+                  details: stderr.toString(),
+                }));
                 core.setFailed('Failed generating changelog');
             } else {
               const { status, stderr, stdout } = spawnSync(`git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`, {shell: true});
               if (status != 0) {
-                  github.issues.createComment({
-                    issue_number: context.issue.number,
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    body: `🤦😭\n\n${error}\n\n${stderr.toString()}`
-                  });
-                  core.setFailed('Failed committing changelog');
+                  core.exportVariable("STATUS", JSON.stringify({ sha: prHead,
+                    context: 'release / changelog',
+                    state: 'error',
+                    description: 'Failed committing release changelog.',
+                  }));
+                  core.setFailed(`Failed committing changelog`);
               }
             }
 
@@ -125,36 +121,48 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            version = context.payload.comment.body.split(' ')[1]
+            const version = "${{ steps.validation.outputs.version }}";
 
             const { spawnSync } = require("child_process");
 
-            const {status, stderr} = spawnSync(`./.github/actions/release.sh -v ${version}`, {shell: true});
+            const { status, stderr} = spawnSync(`./.github/actions/release.sh -v ${version}`, {shell: true});
 
             if (status != 0) {
-                github.issues.createComment({
-                    issue_number: context.issue.number,
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    body: `🛑😭 ${stderr.toString()}`
-                });
-                core.setFailed('Release failed!');
+              core.setFailed(`Release failed!`);
             } else {
-                // TODO status
+              const prHead = "${{ steps.checkout.outputs.pr_head }}";
+              core.exportVariable("STATUS", JSON.stringify({ sha: prHead,
+                context: 'release / changelog',
+                state: 'success',
+                description: 'Additional release-related commits created',
+              }));
             }
-      ### Temporary
-      - name: Comment about action failure
-        if: failure()
+      - name: Publish job status
+        if: always()
         uses: actions/github-script@0.9.0
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
+            const status = ${{env.STATUS}};
+
+            const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🤷 🤦 Failed generating changelog. Please check details in the GitHub action.'
+              sha: status.sha,
+              context: status.context,
+              state: status.state,
+              description: status.description,
+              target_url: "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}",
             });
+
+            if (!!!status.details) {
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: status.details,
+              });
+            }
 
   shipit:
     if: |
@@ -176,28 +184,22 @@ jobs:
                     pull_number: context.issue.number,
                     merge_method: 'rebase'
             }).then(() => {
-                github.checks.create({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: 'release / shipit',
-                    status: 'completed',
-                    conclusion: 'success',
-                    head_sha: context.sha,
-                    output: {
-                      title: `🎇 🎉 🎆 New version has been shipped! 🚀🚀🚀`
-                    },
-                })
+                const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  sha: context.sha,
+                  context: 'release / shipit',
+                  state: 'success',
+                  description: 'New version has been shipped!',
+                });
             }).catch((data) => {
-                github.checks.create({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: 'release / shipit',
-                    status: 'completed',
-                    conclusion: 'failure',
-                    head_sha: context.sha,
-                    output: {
-                      title: `🛑😭 ${data.message}`
-                    },
-                })
+                const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  sha: context.sha,
+                  context: 'release / shipit',
+                  state: 'success',
+                  description: `${data.message}`,
+                });
                 core.setFailed('Merge failed!');
             });
