@@ -26,6 +26,14 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
+            github.checks.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'release / changelog',
+                status: 'in_progress',
+                head_sha: context.sha,
+            })
+
             const { spawnSync } = require("child_process")
 
             const pr = await github.pulls.get({
@@ -37,7 +45,17 @@ jobs:
             const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
 
             if (status != 0) {
-                console.log(stderr.toString());
+                github.checks.create({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: 'release / changelog',
+                    status: 'completed',
+                    conclusion: 'failure',
+                    head_sha: context.sha,
+                    output: {
+                      title: `🛑😭 Failed checking out PR branch. ${stderr.toString()}`
+                    },
+                })
                 core.setFailed(`Failed checking out PR branch. ${stderr.toString()}`);
             }
       - name: Validate
@@ -52,12 +70,17 @@ jobs:
             const { status, stderr } = spawnSync(`./.github/actions/validate.sh ${version}`, {shell: true});
 
             if (status != 0) {
-                github.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: `🛑😭 ${stderr.toString()}`
-                });
+                github.checks.create({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: 'release / changelog',
+                    status: 'completed',
+                    conclusion: 'failure',
+                    head_sha: context.sha,
+                    output: {
+                      title: `🛑😭 ${stderr.toString()}`
+                    },
+                })
                 core.setFailed('Validation failed!');
             }
 
@@ -153,18 +176,28 @@ jobs:
                     pull_number: context.issue.number,
                     merge_method: 'rebase'
             }).then(() => {
-                github.issues.createComment({
-                    issue_number: context.issue.number,
+                github.checks.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    body: `🎇 🎉 🎆 New version has been shipped! 🚀🚀🚀`
-                });
+                    name: 'release / shipit',
+                    status: 'completed',
+                    conclusion: 'success',
+                    head_sha: context.sha,
+                    output: {
+                      title: `🎇 🎉 🎆 New version has been shipped! 🚀🚀🚀`
+                    },
+                })
             }).catch((data) => {
-                github.issues.createComment({
-                    issue_number: context.issue.number,
+                github.checks.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    body: `🛑😭 ${data.message}`
-                });
+                    name: 'release / shipit',
+                    status: 'completed',
+                    conclusion: 'failure',
+                    head_sha: context.sha,
+                    output: {
+                      title: `🛑😭 ${data.message}`
+                    },
+                })
                 core.setFailed('Merge failed!');
             });
