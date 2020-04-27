@@ -33,6 +33,16 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
+            console.log(pr.data);
+            core.exportVariable("PR_HEAD_REF", pr.data.head.ref);
+
+            const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          sha: pr.data.head.ref,
+                          context: 'release / changelog',
+                          state: 'pending',
+            });
 
             core.exportVariable("PR_HEAD_REF", pr.data.head.ref);
 
