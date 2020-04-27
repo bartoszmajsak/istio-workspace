@@ -26,6 +26,7 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
+            console.log(context);
             const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -33,6 +34,7 @@ jobs:
               context: 'release / changelog',
               state: 'pending',
             });
+            console.log(result);
 
       - name: Checkout PR branch
         uses: actions/github-script@0.9.0
