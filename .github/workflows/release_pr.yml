@@ -54,6 +54,16 @@ jobs:
                           state: 'pending',
             });
 
+            core.exportVariable("PR_HEAD_REF", pr.data.head.sha);
+
+            const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          sha: pr.data.head.sha,
+                          context: 'release / changelog',
+                          state: 'pending',
+            });
+
             const { status, stderr } = spawnSync(`git fetch origin pull/${pr.data.number}/head:${pr.data.head.ref} && git checkout ${pr.data.head.ref} && git push --set-upstream origin ${pr.data.head.ref}`, {shell: true});
 
             if (status != 0) {
