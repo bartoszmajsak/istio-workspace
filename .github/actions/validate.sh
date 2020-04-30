@@ -21,7 +21,7 @@ validate_version() {
 
   # ensure release notes exist
   if [[ ! -f "docs/modules/ROOT/pages/release_notes/${version}.adoc" ]]; then
-    die "It seems you want to release ${version} version. Please create release highlights in \`docs/modules/ROOT/pages/release_notes/${version}.adoc\`."
+    die "It seems you want to release \`${version}\`. Please create release highlights in \`docs/modules/ROOT/pages/release_notes/${version}.adoc\`."
   fi
 }
 
