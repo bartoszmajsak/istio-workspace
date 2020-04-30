@@ -180,12 +180,33 @@ jobs:
           || contains(github.event.comment.author_association, 'COLLABORATOR'))
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Populate PR Head
+        id: pr_head
+        uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{secrets.GH_RELEASE_TOKEN}}
+          script: |
+            const pr = await github.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            core.setOutput("sha", pr.data.head.sha);
       - name: Rebase on master
         uses: actions/github-script@0.9.0
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
+            const prHead = "${{ steps.pr_head.outputs.sha }}";
+
+            github.request("POST /repos/:owner/:repo/statuses/:sha", {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: prHead,
+              context: 'release / shipit',
+              state: 'pending',
+            });
+
             github.pulls.merge({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -195,7 +216,7 @@ jobs:
                 github.request("POST /repos/:owner/:repo/statuses/:sha", {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  sha: context.sha,
+                  sha: prHead,
                   context: 'release / shipit',
                   state: 'success',
                   description: 'New version has been shipped!',
@@ -212,7 +233,7 @@ jobs:
                 github.request("POST /repos/:owner/:repo/statuses/:sha", {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  sha: context.sha,
+                  sha: prHead,
                   context: 'release / shipit',
                   state: 'failure',
                   description: `${data.message}`,
