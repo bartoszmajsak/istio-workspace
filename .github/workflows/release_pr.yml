@@ -192,7 +192,7 @@ jobs:
                     pull_number: context.issue.number,
                     merge_method: 'rebase'
             }).then(() => {
-                const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+                github.request("POST /repos/:owner/:repo/statuses/:sha", {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   sha: context.sha,
@@ -209,7 +209,7 @@ jobs:
                 });
 
             }).catch((data) => {
-                const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
+                github.request("POST /repos/:owner/:repo/statuses/:sha", {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   sha: context.sha,
