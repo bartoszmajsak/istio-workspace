@@ -1,0 +1,4 @@
+== Highlights of v0.0.4 release
+
+Not much, just playing with GH Actions.
+
