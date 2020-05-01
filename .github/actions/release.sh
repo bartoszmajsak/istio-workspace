@@ -52,7 +52,7 @@ done
 ## Check if tag exists
 tag_exists=$(git --no-pager tag --list | grep -c "${version}")
 if [[ ${tag_exists} -ne 0 ]]; then
-  die "Tag ${version} already exists!"
+  die "Version \`${version}\` already exists!"
 fi
 
 ## Replace antora version for docs build

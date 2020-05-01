@@ -76,7 +76,7 @@ jobs:
                 core.exportVariable("STATUS", JSON.stringify({ sha: prHead,
                   context: 'release / changelog',
                   state: 'failure',
-                  description: 'Failed validating PR content',
+                  description: 'Failed validating release Pull Request',
                   details: stderr.toString(),
                 }));
                 core.setFailed('Validation failed!');
@@ -115,7 +115,7 @@ jobs:
                     state: 'error',
                     description: 'Failed committing release changelog',
                   }));
-                  core.setFailed(`Failed committing changelog`);
+                  core.setFailed('Failed committing changelog');
               }
             }
 
@@ -147,7 +147,7 @@ jobs:
                 description: 'Additional release-related commits created',
               }));
             }
-      - name: Publish job status
+      - name: Publish job status and comment with details
         if: always()
         uses: actions/github-script@0.9.0
         with:
