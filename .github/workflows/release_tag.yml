@@ -7,9 +7,11 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - name: "Tag matching commit (with `/tag vX.Y.Z` directive in the commit message)"
         uses: actions/github-script@0.9.0
+        env:
+          GIT_USER: ${{secrets.GIT_USER}}
+          GIT_EMAIL: ${{secrets.GIT_EMAIL}}
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
@@ -27,8 +29,8 @@ jobs:
                     object: commit.id,
                     type: 'commit',
                     tagger: {
-                      name: 'Alien Ike',
-                      email: 'arquillian-team@lists.jboss.org',
+                      name: "${{ env.GIT_USER }}",
+                      email: "${{ env.GIT_EMAIL }}",
                     },
                   }).then(() => {
                     github.git.createRef({
