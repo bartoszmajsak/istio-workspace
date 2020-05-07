@@ -31,16 +31,32 @@ jobs:
       - image: *golang-img
     steps:
       - checkout
+      - run:
+          name: "Obtain git tree hash"
+          command: |
+            git rev-parse HEAD: > ./build/build.hash
       - restore_cache:
           keys:
             - golang-deps-cache-{{ checksum "Gopkg.lock" }}
+            - build-cache-{{ checksum "./build/build.hash" }}
       - run:
-          name: "Runs the build"
+          name: "Check if build with this content was already executed"
+          command: |
+            if [[ test -f ./build/build.hash ]]; then
+             echo "This exact code base has been successfully built"
+             circleci step halt
+           fi
+      - run:
+          name: "Run the build"
           command: make build-ci
       - save_cache:
           key: golang-deps-cache-{{ checksum "Gopkg.lock" }}
           paths:
             - ./vendor
+      - save_cache:
+          key: build-cache-{{ checksum "./build/build.hash" }}
+          paths:
+            - ./build/build.hash
 
   ## End-to-end testing involving OpenShift cluster with Istio (Maistra) installed (local)
   e2e_tests_local_openshift_3:
@@ -51,6 +67,20 @@ jobs:
       <<: *env-vars
     steps:
       - checkout
+      - run:
+          name: "Obtain git tree hash"
+          command: |
+            git rev-parse HEAD: > ./build/e2e-openshift-3.hash
+      - restore_cache:
+          keys:
+            - build-cache-{{ checksum "./build/e2e-openshift-3.hash" }}
+      - run:
+          name: "Check if build with this content was already executed"
+          command: |
+            if [[ test -f ./build/e2e-openshift-3.hash ]]; then
+             echo "This exact code base has been successfully built"
+             circleci step halt
+            fi
       - run:
           <<: *skip-e2e-check
       - run:
@@ -104,6 +134,11 @@ jobs:
           key: golang-deps-e2e-cache-{{ checksum "Gopkg.lock" }}
           paths:
             - ./vendor
+      - save_cache:
+          key: build-cache-{{ checksum "./build/e2e-openshift-3.hash" }}
+          paths:
+            - ./build/e2e-openshift-3.hash
+            -
   ## End-to-end testing involving OpenShift cluster with Istio (Maistra) running remotely
   e2e_tests_remote_openshift_4:
     working_directory: ~/.go_workspace/src/github.com/maistra/istio-workspace
@@ -114,6 +149,21 @@ jobs:
       IKE_CLUSTER_VERSION: 4
     steps:
       - checkout
+      - run:
+          name: "Obtain git tree hash"
+          command: |
+            git rev-parse HEAD: > ./build/e2e-openshift-4.hash
+      - restore_cache:
+          keys:
+            - build-cache-{{ checksum "./build/e2e-openshift-4.hash" }}
+      - run:
+          name: "Check if build with this content was already executed"
+          command: |
+            if [[ test -f ./build/e2e-openshift-4.hash ]]; then
+             echo "This exact code base has been successfully built"
+             circleci step halt
+            fi
+
       - run:
           <<: *skip-e2e-check
       - run:
@@ -160,6 +210,10 @@ jobs:
           key: golang-deps-e2e-cache-{{ checksum "Gopkg.lock" }}
           paths:
             - ./vendor
+      - save_cache:
+          key: build-cache-{{ checksum "./build/e2e-openshift-4.hash" }}
+          paths:
+            - ./build/e2e-openshift-4.hash
 
   release:
     working_directory: ~/.go_workspace/src/github.com/maistra/istio-workspace
