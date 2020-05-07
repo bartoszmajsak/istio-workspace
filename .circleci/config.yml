@@ -45,7 +45,7 @@ jobs:
             if [[ test -f ./build/build.hash ]]; then
              echo "This exact code base has been successfully built"
              circleci step halt
-           fi
+            fi
       - run:
           name: "Run the build"
           command: make build-ci
@@ -138,7 +138,7 @@ jobs:
           key: build-cache-{{ checksum "./build/e2e-openshift-3.hash" }}
           paths:
             - ./build/e2e-openshift-3.hash
-            -
+            
   ## End-to-end testing involving OpenShift cluster with Istio (Maistra) running remotely
   e2e_tests_remote_openshift_4:
     working_directory: ~/.go_workspace/src/github.com/maistra/istio-workspace
