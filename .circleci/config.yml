@@ -34,17 +34,19 @@ jobs:
       - run:
           name: "Obtain git tree hash"
           command: |
-            git rev-parse HEAD: > ./build/build.hash
+            git rev-parse HEAD: > /tmp/build.hash
       - restore_cache:
           keys:
             - golang-deps-cache-{{ checksum "Gopkg.lock" }}
-            - build-cache-{{ checksum "./build/build.hash" }}
+            - build-cache-{{ checksum "/tmp/build.hash" }}
       - run:
           name: "Check if build with this content was already executed"
           command: |
             if [[ -f ./build/build.hash ]]; then
-             echo "This exact code base has been successfully built"
-             circleci step halt
+              echo "This exact code base has been successfully built"
+              circleci step halt
+            else
+              cp /tmp/build.hash ./build/build.hash
             fi
       - run:
           name: "Run the build"
@@ -70,16 +72,18 @@ jobs:
       - run:
           name: "Obtain git tree hash"
           command: |
-            git rev-parse HEAD: > ./build/e2e-openshift-3.hash
+            git rev-parse HEAD: > /tmp/e2e-openshift-3.hash
       - restore_cache:
           keys:
-            - build-cache-{{ checksum "./build/e2e-openshift-3.hash" }}
+            - build-cache-{{ checksum "/tmp/e2e-openshift-3.hash" }}
       - run:
           name: "Check if build with this content was already executed"
           command: |
             if [[ -f ./build/e2e-openshift-3.hash ]]; then
-             echo "This exact code base has been successfully built"
-             circleci step halt
+              echo "This exact code base has been successfully built"
+              circleci step halt
+            else
+              cp /tmp/e2e-openshift-3.hash ./build/e2e-openshift-3.hash
             fi
       - run:
           <<: *skip-e2e-check
@@ -152,16 +156,18 @@ jobs:
       - run:
           name: "Obtain git tree hash"
           command: |
-            git rev-parse HEAD: > ./build/e2e-openshift-4.hash
+            git rev-parse HEAD: > /tmp/e2e-openshift-4.hash
       - restore_cache:
           keys:
-            - build-cache-{{ checksum "./build/e2e-openshift-4.hash" }}
+            - build-cache-{{ checksum "/tmp/e2e-openshift-4.hash" }}
       - run:
           name: "Check if build with this content was already executed"
           command: |
             if [[ -f ./build/e2e-openshift-4.hash ]]; then
-             echo "This exact code base has been successfully built"
-             circleci step halt
+              echo "This exact code base has been successfully built"
+              circleci step halt
+            else
+              cp /tmp/e2e-openshift-4.hash ./build/e2e-openshift-4.hash
             fi
 
       - run:
