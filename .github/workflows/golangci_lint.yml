@@ -24,6 +24,7 @@ jobs:
           path: go/src/github.com/${{ github.repository }}
       - name: Install dep
         run: |
+          cd $GOPATH/src/github.com/${{ github.repository }}
           if [ -f Gopkg.toml ]; then
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
