@@ -14,8 +14,6 @@ jobs:
         with:
           go-version: 1.14.4
       - name: Set $GOPATH
-        # temporary fix
-        # see https://github.com/actions/setup-go/issues/14
         run: |
           echo "::set-env name=GOPATH::${{ github.workspace }}/go"
           echo "::add-path::${{ github.workspace }}/go/bin"
@@ -31,9 +29,12 @@ jobs:
             dep ensure
           fi
       - name: Prepare codebase for linter (generates deps, stubs)
-        run: make lint-prepare
+        run: |
+          cd $GOPATH/src/github.com/${{ github.repository }}
+          make lint-prepare
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v1
         with:
           version: v1.19.1
           only-new-issues: true
+          working-directory: $GOPATH/src/github.com/${{ github.repository }}
