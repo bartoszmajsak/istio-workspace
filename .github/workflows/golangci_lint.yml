@@ -17,10 +17,12 @@ jobs:
         # temporary fix
         # see https://github.com/actions/setup-go/issues/14
         run: |
-          echo "##[set-env name=GOPATH;]$(dirname $GITHUB_WORKSPACE)"
-          echo "##[add-path]$(dirname $GITHUB_WORKSPACE)/bin"
+          echo "::set-env name=GOPATH::${{ github.workspace }}/go"
+          echo "::add-path::${{ github.workspace }}/go/bin"
         shell: bash
       - uses: actions/checkout@v2
+        fetch-depth: 1
+        path: go/src/github.com/${{ github.repository }}
       - name: Install dep
         run: |
           if [ -f Gopkg.toml ]; then
