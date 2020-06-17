@@ -1,0 +1,38 @@
+name: golangci-lint
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.14.4
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14.4
+      - name: Set $GOPATH
+        # temporary fix
+        # see https://github.com/actions/setup-go/issues/14
+        run: |
+          echo "::set-env name=GOPATH::${{ github.workspace }}/go"
+          echo "::add-path::${{ github.workspace }}/go/bin"
+        shell: bash
+      - uses: actions/checkout@v2
+        fetch-depth: 1
+        path: go/src/github.com/${{ github.repository }}
+      - name: Install dep
+        run: |
+          if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+          fi
+      - name: Prepare codebase for linter (generates deps, stubs)
+        run: make lint-prepare
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v1
+        with:
+          version: v1.19.1
+          only-new-issues: true
