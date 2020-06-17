@@ -14,6 +14,11 @@ jobs:
         with:
           go-version: 1.14.4
       - uses: actions/checkout@v2
+      - name: Install dep
+        run: |
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+          fi
       - name: Prepare codebase for linter (generates deps, stubs)
         run: make lint-prepare
       - name: golangci-lint
