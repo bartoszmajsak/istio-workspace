@@ -21,8 +21,9 @@ jobs:
           echo "::add-path::${{ github.workspace }}/go/bin"
         shell: bash
       - uses: actions/checkout@v2
-        fetch-depth: 1
-        path: go/src/github.com/${{ github.repository }}
+        with:
+          fetch-depth: 1
+          path: go/src/github.com/${{ github.repository }}
       - name: Install dep
         run: |
           if [ -f Gopkg.toml ]; then
