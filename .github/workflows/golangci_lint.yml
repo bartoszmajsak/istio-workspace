@@ -17,7 +17,8 @@ jobs:
       - name: Install dep
         run: |
           if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
           fi
       - name: Prepare codebase for linter (generates deps, stubs)
         run: make lint-prepare
