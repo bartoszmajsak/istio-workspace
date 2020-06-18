@@ -8,6 +8,8 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
+    env:
+      REPOSITORY: maistra/istio-workspace # ${{ github.repository }}
     steps:
       - name: Set up Go 1.14.4
         uses: actions/setup-go@v2
@@ -21,21 +23,21 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
-          path: go/src/github.com/${{ github.repository }}
+          path: go/src/github.com/${{ env.REPOSITORY }}
       - name: Install dep
         run: |
           mkdir $GOPATH/bin
-          cd $GOPATH/src/github.com/${{ github.repository }}
+          cd $GOPATH/src/github.com/${{ env.REPOSITORY }}
           if [ -f Gopkg.toml ]; then
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
           fi
       - name: Prepare codebase for linter (generates deps, stubs)
         run: |
-          cd $GOPATH/src/github.com/${{ github.repository }}
+          cd $GOPATH/src/github.com/${{ env.REPOSITORY }}
           make lint-prepare
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v1
         with:
           version: v1.19
-          working-directory: ${{ env.GOPATH }}/src/github.com/${{ github.repository }}
+          working-directory: ${{ env.GOPATH }}/src/github.com/${{ env.REPOSITORY }}
