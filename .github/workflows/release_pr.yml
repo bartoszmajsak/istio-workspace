@@ -54,7 +54,9 @@ jobs:
                 context: 'release / changelog',
                 state: 'error',
                 description: 'Failed checking out PR branch',
+                details: stderr.toString(),  
               }));
+              console.log(stderr.toString());
               core.setFailed('Failed checking out PR branch');
             }
 
@@ -105,6 +107,7 @@ jobs:
                   description: 'Failed generating changelog',
                   details: stderr.toString(),
                 }));
+                console.log(stderr.toString());  
                 core.setFailed('Failed generating changelog');
             } else {
               const pushCmd = `git add . && git commit -m"release: adds changelog for ${version}" && git push && git rev-parse --short HEAD`;
@@ -114,7 +117,9 @@ jobs:
                     context: 'release / changelog',
                     state: 'error',
                     description: 'Failed committing release changelog',
+                    details: stderr.toString(),  
                   }));
+                  console.log(stderr.toString()); 
                   core.setFailed('Failed committing changelog');
               }
             }
