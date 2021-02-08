@@ -9,3 +9,7 @@ Why is that cool and important?
 == All changes in this release
 
 // changelog:generate
+== Latest dependencies update
+
+ * github.com/onsi/ginkgo to 1.15.0 (https://github.com/maistra/istio-workspace/pull/669[#669]), by https://github.com/dependabot[@dependabot]
+
