@@ -1,4 +1,6 @@
 = Releases
+ninclude::release_notes/v0.0.6.adoc[]
+
 include::release_notes/v0.0.6.adoc[]
 
 include::release_notes/v0.0.6.adoc[]
