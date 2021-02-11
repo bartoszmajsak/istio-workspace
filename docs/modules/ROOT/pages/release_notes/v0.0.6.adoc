@@ -9,3 +9,23 @@ Why is that cool and important?
 == All changes in this release
 
 // changelog:generate
+=== Command line
+
+==== New features
+* fix(cli): add k8s auth package (https://github.com/maistra/istio-workspace/pull/682[#682]), by https://github.com/Humpheh[@Humpheh]
+
+
+=== Project infrastructure
+
+==== New features
+* feat(operator): automates operator bundle submission (https://github.com/maistra/istio-workspace/pull/685[#685]), by https://github.com/bartoszmajsak[@bartoszmajsak]
+
+==== Bugs
+* fix(circle): uses custom gpg program to sign commits (https://github.com/maistra/istio-workspace/pull/687[#687]), by https://github.com/bartoszmajsak[@bartoszmajsak]
+
+== Latest dependencies update
+
+ * github.com/onsi/ginkgo to 1.15.0 (https://github.com/maistra/istio-workspace/pull/669[#669]), by https://github.com/dependabot[@dependabot]
+ * github.com/onsi/gomega to 1.10.5 (https://github.com/maistra/istio-workspace/pull/668[#668]), by https://github.com/dependabot[@dependabot]
+ * version to istio.io/client-go (https://github.com/maistra/istio-workspace/pull/681[#681]), by https://github.com/Humpheh[@Humpheh]
+
