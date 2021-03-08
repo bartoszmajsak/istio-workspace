@@ -216,7 +216,7 @@ jobs:
       - run:
           name: "Install Node"
           command: |
-            sudo circleci-install node 10
+            sudo circleci-install nodejs 10
       - run:
           name: "Installs release tools prerequisites"
           command: |
