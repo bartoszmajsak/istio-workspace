@@ -9,3 +9,16 @@ Why is that cool and important?
 === All changes in this release
 
 // changelog:generate
+==== Build System Integration
+
+===== New features
+* feat: initial move of Tekton tasks (https://github.com/maistra/istio-workspace/pull/728[#728]), by https://github.com/bartoszmajsak[@bartoszmajsak]
+
+
+=== Latest dependencies update
+
+ * github.com/kisielk/errcheck to 1.6.0 (https://github.com/maistra/istio-workspace/pull/722[#722]), by https://github.com/dependabot[@dependabot]
+ * github.com/onsi/ginkgo to 1.15.1 (https://github.com/maistra/istio-workspace/pull/732[#732]), by https://github.com/dependabot[@dependabot]
+ * golangci/golangci-lint-action to v2.5.1. (https://github.com/maistra/istio-workspace/pull/720[#720]), by https://github.com/dependabot[@dependabot]
+ * istio.io/client-go to 1.9.1 (https://github.com/maistra/istio-workspace/pull/731[#731]), by https://github.com/dependabot[@dependabot]
+
