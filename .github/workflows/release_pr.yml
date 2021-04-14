@@ -66,7 +66,7 @@ jobs:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
             const prTitle = {{ steps.checkout.outputs.pr_title }};
-            const version = prTitle.split(' ')[prTitle.length - 1]
+            const version = prTitle.split(' ')[prTitle.length - 1];
             core.setOutput("version", version);
 
             const { spawnSync } = require("child_process");
@@ -214,7 +214,7 @@ jobs:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
             const prTitle = {{ steps.checkout.outputs.pr_title }};
-            const version = prTitle.split(' ')[prTitle.length - 1]
+            const version = prTitle.split(' ')[prTitle.length - 1];
             core.setOutput("version", version);
 
             const { spawnSync } = require("child_process");
