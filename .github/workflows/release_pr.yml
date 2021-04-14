@@ -37,6 +37,7 @@ jobs:
 
             const prHead = pr.data.head.sha;
             core.setOutput("pr_head", prHead);
+            core.setOutput("pr_title", pr.data.title);
 
             const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
               owner: context.repo.owner,
@@ -64,7 +65,8 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            const version = context.payload.comment.body.split(' ')[1]
+            const prTitle = "${{ steps.checkout.outputs.pr_title }}";
+            const version = prTitle.split(' ')[prTitle.length - 1];
             core.setOutput("version", version);
 
             const { spawnSync } = require("child_process");
@@ -183,6 +185,7 @@ jobs:
 
             const prHead = pr.data.head.sha;
             core.setOutput("pr_head", prHead);
+            core.setOutput("pr_title", pr.data.title);
 
             const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
               owner: context.repo.owner,
@@ -210,7 +213,8 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            const version = context.payload.comment.body.split(' ')[1]
+            const prTitle = "${{ steps.checkout.outputs.pr_title }}";
+            const version = prTitle.split(' ')[prTitle.length - 1];
             core.setOutput("version", version);
 
             const { spawnSync } = require("child_process");
