@@ -38,7 +38,7 @@ jobs:
             const prHead = pr.data.head.sha;
             core.setOutput("pr_head", prHead);
             console.log(pr.data);
-            core.setOutput("pr_title", pr.data.title);
+            core.setOutput("pr_title", pr.data.title.trim());
 
             const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
               owner: context.repo.owner,
