@@ -65,7 +65,7 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            const prTitle = {{ steps.checkout.outputs.pr_title }};
+            const prTitle = "${{ steps.checkout.outputs.pr_title }}";
             const version = prTitle.split(' ')[prTitle.length - 1];
             core.setOutput("version", version);
 
@@ -213,7 +213,7 @@ jobs:
         with:
           github-token: ${{secrets.GH_RELEASE_TOKEN}}
           script: |
-            const prTitle = {{ steps.checkout.outputs.pr_title }};
+            const prTitle = "${{ steps.checkout.outputs.pr_title }}";
             const version = prTitle.split(' ')[prTitle.length - 1];
             core.setOutput("version", version);
 
