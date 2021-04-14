@@ -186,7 +186,7 @@ jobs:
 
             const prHead = pr.data.head.sha;
             core.setOutput("pr_head", prHead);
-            core.setOutput("pr_title", pr.data.title);
+            core.setOutput("pr_title", pr.data.title.trim());
 
             const result = await github.request("POST /repos/:owner/:repo/statuses/:sha", {
               owner: context.repo.owner,
@@ -216,7 +216,6 @@ jobs:
           script: |
             const prTitle = "${{ steps.checkout.outputs.pr_title }}";
             const prTitleWords = prTitle.split(' ');
-            console.log(prTitle);
             const version = prTitleWords[prTitleWords.length - 1];
             core.setOutput("version", version);
 
